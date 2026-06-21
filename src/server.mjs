@@ -201,3 +201,17 @@ server.listen(PORT, () => {
   console.log(`[aurora] Default database: ${DEFAULT_DB}`);
   console.log(`[aurora] Connect: mysql -h 127.0.0.1 -P ${PORT} -u ${USER} -p${PASSWORD} ${DEFAULT_DB}`);
 });
+
+// ── Graceful shutdown ──────────────────────────────────────────
+
+process.on('SIGTERM', () => {
+  console.log('[aurora] SIGTERM received — shutting down...');
+  engine.shutdown();
+  server.close(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
+  console.log('[aurora] SIGINT received — shutting down...');
+  engine.shutdown();
+  server.close(() => process.exit(0));
+});
