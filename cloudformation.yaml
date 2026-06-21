@@ -35,7 +35,7 @@ Resources:
         - FARGATE
       ContainerDefinitions:
         - Name: aurora-serverless
-          Image: gormantec/docker-aurora-serverless:latest
+          Image: ghcr.io/gormantec/docker-aurora-serverless:latest
           PortMappings:
             - ContainerPort: 3306
               Protocol: tcp
