@@ -72,10 +72,16 @@ making any SQLite database appear as an Amazon Aurora Serverless cluster to MySQ
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AURORA_USER` | `admin` | MySQL username for auth |
-| `AURORA_PASSWORD` | `password` | MySQL password for auth |
+| `AURORA_PASSWORD` | **Required** — auto-generated if unset (printed to logs) | MySQL password for auth |
 | `AURORA_PORT` | `3306` | MySQL wire protocol listen port |
 | `DATA_DIR` | `/data` | SQLite database directory |
 | `DEFAULT_DATABASE` | `aurora` | Default database created on startup |
+
+> ⚠️ `AURORA_PASSWORD` has no default. If not set at runtime, a random 32-char password
+> is generated and printed to stdout. Set it explicitly in production:
+> ```bash
+> docker run -e AURORA_PASSWORD=mysecretpassword ... gormantec/docker-aurora-serverless:latest
+> ```
 
 ## CloudFormation (docker-iot)
 
