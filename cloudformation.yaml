@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Amazon Aurora Serverless — SQLite-backed MySQL wire protocol proxy for docker-iot'
+
+Metadata:
+  IoTCoreLite:
+    SecretsGroup: gormantec.com
+    Webapp: aurora-serverless
+
+Parameters:
+  AuroraUsername:
+    Type: String
+    Default: admin
+    Description: Master username for Aurora Serverless cluster
+
+  AuroraPassword:
+    Type: String
+    NoEcho: true
+    Default: '{{secret:AURORA_PASSWORD}}'
+    Description: Master password for Aurora Serverless cluster
+
+  DatabaseName:
+    Type: String
+    Default: aurora
+    Description: Default database name
+
+Resources:
+  AuroraServerlessTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: aurora-serverless
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: bridge
+      RequiresCompatibilities:
+        - FARGATE
+      ContainerDefinitions:
+        - Name: aurora-serverless
+          Image: gormantec/docker-aurora-serverless:latest
+          PortMappings:
+            - ContainerPort: 3306
+              Protocol: tcp
+          Environment:
+            - Name: AURORA_USER
+              Value: !Ref AuroraUsername
+            - Name: AURORA_PASSWORD
+              Value: !Ref AuroraPassword
+            - Name: DEFAULT_DATABASE
+              Value: !Ref DatabaseName
+          MountPoints:
+            - SourceVolume: aurora-data
+              ContainerPath: /data
+              ReadOnly: false
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-mysql
+      EngineMode: serverless
+      DatabaseName: !Ref DatabaseName
+      MasterUsername: !Ref AuroraUsername
+      MasterUserPassword: !Ref AuroraPassword
+      Port: 3306
+      ScalingConfiguration:
+        MinCapacity: 1
+        MaxCapacity: 1
+      StorageEncrypted: true
+
+  AuroraService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: aurora-serverless
+      Cluster: default
+      TaskDefinition: !Ref AuroraServerlessTask
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: []
+          SecurityGroups: []
+          AssignPublicIp: DISABLED
+
+Outputs:
+  AuroraEndpoint:
+    Description: Aurora Serverless cluster endpoint (MySQL wire protocol)
+    Value: !GetAtt AuroraCluster.Endpoint
+  AuroraPort:
+    Description: Aurora Serverless MySQL port
+    Value: '3306'
+  AuroraDataApiEndpoint:
+    Description: Aurora Data API endpoint (HTTP SQL)
+    Value: !Sub 'https://iot.${RootDomain}/api/mobile/sql'
+  AuroraConnectionString:
+    Description: MySQL connection string
+    Value: !Sub 'mysql://${AuroraUsername}:${AuroraPassword}@aurora-serverless:3306/${DatabaseName}'
