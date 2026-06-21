@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.mjs",
     "build:image": "docker build -t ghcr.io/gormantec/docker-aurora-serverless:latest .",
-    "build:image-force": "iot build start --push --recreate --follow --read-env --sync-secrets",
+    "build:image-force": "iot build start --push --follow --read-env --sync-secrets",
     "push:image": "docker push ghcr.io/gormantec/docker-aurora-serverless:latest",
     "build:push": "npm run build:image && npm run push:image",
     "test": "node --test tests/*.test.mjs"
