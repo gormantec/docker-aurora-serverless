@@ -28,8 +28,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: aurora-serverless
-      Cpu: '256'
-      Memory: '512'
+      Cpu: '128'
+      Memory: '256'
       NetworkMode: bridge
       RequiresCompatibilities:
         - FARGATE
