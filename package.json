@@ -6,6 +6,7 @@
   "main": "src/server.mjs",
   "scripts": {
     "start": "node src/server.mjs",
+    "stack:recreate": "iot cloudformation delete-stack --stack-name ecs-aurora-serverless && echo 'wait 10sec' && sleep 10 && iot cloudformation create-stack --stack-name ecs-aurora-serverless  --template-file cloudformation.yaml",
     "build:image": "docker build -t ghcr.io/gormantec/docker-aurora-serverless:latest .",
     "build:image-force": "iot build start --push --follow",
     "push:image": "docker push ghcr.io/gormantec/docker-aurora-serverless:latest",
